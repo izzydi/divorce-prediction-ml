@@ -8,8 +8,7 @@ The analysis is implemented in R Markdown and explores a supervised machine-lear
 
 ## Repository contents
 
-- [`ADM_Project.Rmd`](ADM_Project.Rmd) — complete source analysis.
-- [`README.md`](README.md) — project documentation.
+- [`divorce_prediction.Rmd`](divorce_prediction.Rmd) — complete source analysis.
 
 ## Data source
 
@@ -21,10 +20,10 @@ Build and compare classification models that predict marital-status class from t
 
 ## Reproducing the analysis
 
-1. Download the Divorce Predictors dataset referenced in `ADM_Project.Rmd`.
-2. Open the R Markdown file in RStudio.
+1. Download the Divorce Predictors dataset referenced in `divorce_prediction.Rmd`.
+2. Open `divorce_prediction.Rmd` in RStudio.
 3. Install any required packages listed in the analysis.
-4. Update the local data path if necessary and knit/run the document.
+4. Update the local data path if necessary and run or knit the document.
 
 ## Notes
 
