@@ -10,8 +10,9 @@ A binary-classification project using the **UCI Divorce Predictors** questionnai
 
 - [`divorce_prediction.Rmd`](divorce_prediction.Rmd) — audited R Markdown workflow.
 - [`archive/legacy_course_analysis.Rmd`](archive/legacy_course_analysis.Rmd) — original coursework retained for provenance.
-- [`data/README.md`](data/README.md) — expected dataset layout.
-- [`R-packages.txt`](R-packages.txt) — direct R dependencies.
+- [`data/README.md`](data/README.md) — authoritative UCI source, license and expected dataset layout.
+- [`R-packages.txt`](R-packages.txt) — version-pinned direct R dependencies.
+- [`.github/workflows/r-ci.yml`](.github/workflows/r-ci.yml) — R 4.6.1 dependency and syntax CI.
 
 ## Audit improvements
 
@@ -19,13 +20,22 @@ The original analysis calculated one correlation matrix using the complete datas
 
 ## Data
 
-The dataset contains 170 observations and 54 questionnaire predictors. Because it is small, model performance can vary materially across samples; results should be interpreted as an educational modelling exercise rather than a real-world assessment tool.
+The dataset contains 170 observations and 54 questionnaire predictors. [`data/README.md`](data/README.md) records the authoritative UCI dataset page, DOI and license. Because the dataset is small, model performance can vary materially across samples; results should be interpreted as an educational modelling exercise rather than a real-world assessment tool.
 
 ## Reproducing the analysis
 
-1. Place `divorce.csv` under `data/` as described in [`data/README.md`](data/README.md).
-2. Install packages in [`R-packages.txt`](R-packages.txt).
-3. Run or knit `divorce_prediction.Rmd` from top to bottom.
+1. Install R 4.6.1.
+2. Place `divorce.csv` under `data/` as described in [`data/README.md`](data/README.md).
+3. Install `pak` and the pinned direct dependencies:
+
+```r
+install.packages("pak")
+pak::pkg_install(readLines("R-packages.txt"), upgrade = FALSE)
+```
+
+4. Run or knit `divorce_prediction.Rmd` from top to bottom.
+
+GitHub Actions performs the same direct-dependency installation and parses the canonical R Markdown source on every push and pull request. `R-packages.txt` is a direct-dependency manifest, not a complete `renv.lock` snapshot.
 
 ## Scope
 
