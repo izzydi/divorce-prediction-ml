@@ -1,30 +1,32 @@
 # Divorce Prediction with Machine Learning
 
-A binary-classification project using the **Divorce Predictors** dataset to distinguish between married and divorced participants from questionnaire responses.
+A binary-classification project using the **UCI Divorce Predictors** questionnaire dataset.
 
-## Project overview
+## Primary workflow
 
-The analysis is implemented in R Markdown and explores a supervised machine-learning workflow on a small structured dataset. The original project reports that the models evaluated achieved 100% accuracy on its held-out test split; because the dataset is small, that result should be interpreted in the context of the specific split and validation design used in the analysis.
+[`divorce_prediction.Rmd`](divorce_prediction.Rmd) is the audited source. It uses a stratified hold-out split, computes correlation and PCA from training data only, performs repeated cross-validation only inside the training partition, and compares logistic regression with a 500-tree Ranger Random Forest before a final held-out evaluation.
 
 ## Repository contents
 
-- [`divorce_prediction.Rmd`](divorce_prediction.Rmd) — complete source analysis.
+- [`divorce_prediction.Rmd`](divorce_prediction.Rmd) — audited R Markdown workflow.
+- [`archive/legacy_course_analysis.Rmd`](archive/legacy_course_analysis.Rmd) — original coursework retained for provenance.
+- [`data/README.md`](data/README.md) — expected dataset layout.
+- [`R-packages.txt`](R-packages.txt) — direct R dependencies.
 
-## Data source
+## Audit improvements
 
-The project uses the UCI Divorce Predictors dataset. The dataset contains questionnaire-derived features from 170 participants: 84 divorced and 86 married.
+The original analysis calculated one correlation matrix using the complete dataset after splitting, allowing held-out information into that transformation. The current workflow keeps exploratory transforms and model selection inside training data. It also avoids presenting the original 100% split-specific accuracy as a generalizable performance claim.
 
-## Objective
+## Data
 
-Build and compare classification models that predict marital-status class from the available predictor variables.
+The dataset contains 170 observations and 54 questionnaire predictors. Because it is small, model performance can vary materially across samples; results should be interpreted as an educational modelling exercise rather than a real-world assessment tool.
 
 ## Reproducing the analysis
 
-1. Download the Divorce Predictors dataset referenced in `divorce_prediction.Rmd`.
-2. Open `divorce_prediction.Rmd` in RStudio.
-3. Install any required packages listed in the analysis.
-4. Update the local data path if necessary and run or knit the document.
+1. Place `divorce.csv` under `data/` as described in [`data/README.md`](data/README.md).
+2. Install packages in [`R-packages.txt`](R-packages.txt).
+3. Run or knit `divorce_prediction.Rmd` from top to bottom.
 
-## Notes
+## Scope
 
-This repository preserves the original academic analysis while documenting its scope and limitations more clearly for portfolio review.
+This is an academic machine-learning portfolio project. It is not intended for relationship, legal, psychological or clinical decision-making.
