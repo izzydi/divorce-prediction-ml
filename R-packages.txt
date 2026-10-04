@@ -1,4 +1,4 @@
-caret
-ranger
-ggplot2
-corrplot
+caret@7.0-1
+ranger@0.18.0
+ggplot2@4.0.3
+corrplot@0.95
