@@ -1,0 +1,149 @@
+---
+title: "Divorce Prediction with Machine Learning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(caret)
+library(ranger)
+library(ggplot2)
+library(corrplot)
+```
+
+## Data
+
+The project uses the UCI Divorce Predictors dataset. Place the semicolon-delimited file at `data/divorce.csv`.
+
+```{r}
+set.seed(1821)
+
+data_path <- file.path("data", "divorce.csv")
+if (!file.exists(data_path)) {
+  stop("Missing data/divorce.csv. See data/README.md for the expected file.")
+}
+
+divorce <- read.csv(data_path, sep = ";", check.names = FALSE)
+if (!"Class" %in% names(divorce)) {
+  stop("Expected a target column named 'Class'.")
+}
+
+divorce$Class <- factor(divorce$Class)
+if (nlevels(divorce$Class) != 2) {
+  stop("This workflow expects a binary Class target.")
+}
+
+str(divorce)
+table(divorce$Class)
+```
+
+## Stratified hold-out split
+
+The small dataset makes evaluation especially sensitive to a single split, so the target is stratified and the hold-out set is kept untouched until final evaluation.
+
+```{r}
+set.seed(1821)
+train_index <- createDataPartition(divorce$Class, p = 0.75, list = FALSE)
+train_data <- divorce[train_index, ]
+test_data <- divorce[-train_index, ]
+```
+
+## Training-only exploratory structure
+
+Correlation and PCA are calculated from the training partition only. The test set does not influence these exploratory transformations.
+
+```{r, fig.width=9, fig.height=8}
+predictor_names <- setdiff(names(train_data), "Class")
+train_correlation <- cor(train_data[predictor_names], method = "spearman")
+corrplot(train_correlation, type = "lower", tl.cex = 0.45)
+```
+
+```{r}
+pca_model <- prcomp(
+  train_data[predictor_names],
+  center = TRUE,
+  scale. = TRUE
+)
+
+train_pca <- as.data.frame(predict(pca_model, newdata = train_data[predictor_names]))
+train_pca$Class <- train_data$Class
+
+test_pca <- as.data.frame(predict(pca_model, newdata = test_data[predictor_names]))
+test_pca$Class <- test_data$Class
+
+summary(pca_model)
+```
+
+```{r}
+ggplot(train_pca, aes(PC1, PC2, color = Class)) +
+  geom_point(size = 2, alpha = 0.8) +
+  theme_minimal() +
+  labs(title = "Training-set PCA projection")
+```
+
+## Model training
+
+Two interpretable baselines are compared using repeated cross-validation **inside the training partition**. The held-out test set is not used for model selection.
+
+```{r}
+control <- trainControl(
+  method = "repeatedcv",
+  number = 5,
+  repeats = 5,
+  classProbs = TRUE,
+  savePredictions = "final"
+)
+
+set.seed(1821)
+logistic_model <- train(
+  Class ~ .,
+  data = train_data,
+  method = "glm",
+  family = binomial(),
+  trControl = control,
+  metric = "Accuracy"
+)
+
+set.seed(1821)
+rf_model <- train(
+  Class ~ .,
+  data = train_data,
+  method = "ranger",
+  trControl = control,
+  tuneLength = 5,
+  metric = "Accuracy",
+  num.trees = 500,
+  importance = "permutation"
+)
+
+logistic_model
+rf_model
+```
+
+## Held-out evaluation
+
+```{r}
+logistic_predictions <- predict(logistic_model, newdata = test_data)
+rf_predictions <- predict(rf_model, newdata = test_data)
+
+logistic_confusion <- confusionMatrix(logistic_predictions, test_data$Class)
+rf_confusion <- confusionMatrix(rf_predictions, test_data$Class)
+
+logistic_confusion
+rf_confusion
+```
+
+## Variable importance
+
+```{r}
+plot(varImp(rf_model), top = 20, main = "Random Forest predictor importance")
+```
+
+## Interpretation note
+
+This dataset contains only about 170 observations. Very high accuracy on one split should therefore not be interpreted as evidence that the model will generalize equally well to new populations. The held-out result is reported as an educational demonstration rather than a clinical, legal or relationship-assessment tool.
+
+## Session information
+
+```{r}
+sessionInfo()
+```
